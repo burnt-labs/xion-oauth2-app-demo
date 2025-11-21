@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Button } from './ui/Button'
 import { getTokenInfo, clearTokenInfo } from '@/utils/oauth'
 import { transactionApi } from '@/utils/api'
-import type { ApiResponse } from '@/types'
 import { LogOut, TestTube } from 'lucide-react'
 
 interface ConsoleLog {
@@ -154,7 +153,7 @@ export function Dashboard() {
                       </span>
                       <span className="text-foreground">{log.message}</span>
                     </div>
-                    {log.data && (
+                    {log.data !== undefined && (
                       <pre className="ml-6 text-xs text-muted-foreground overflow-x-auto whitespace-pre-wrap break-words">
                         {JSON.stringify(log.data, null, 2)}
                       </pre>

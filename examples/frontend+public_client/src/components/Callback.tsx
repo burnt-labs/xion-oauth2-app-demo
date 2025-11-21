@@ -12,10 +12,14 @@ export function Callback() {
   useEffect(() => {
     const handleCallback = async () => {
       const code = searchParams.get('code')
+      const state = searchParams.get('state')
       const errorParam = searchParams.get('error')
+      const errorDescription = searchParams.get('error_description')
 
       if (errorParam) {
-        setError(`Authorization error: ${errorParam}`)
+        setError(
+          `Authorization error: ${errorParam}${errorDescription ? ` - ${errorDescription}` : ''}`
+        )
         setIsLoading(false)
         return
       }
@@ -27,7 +31,9 @@ export function Callback() {
       }
 
       try {
-        await exchangeCodeForToken(code)
+        // Exchange authorization code for access token using PKCE
+        // This is the Public Client flow - no client_secret needed
+        await exchangeCodeForToken(code, state || undefined)
         navigate('/dashboard', { replace: true })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to exchange code for token')
