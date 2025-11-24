@@ -22,6 +22,7 @@ A frontend demo application showcasing Xion OAuth2 Client integration using stan
 **Location**: `examples/frontend+public_client/`
 
 **Features**:
+
 - Standard OAuth2 authorization flow (Authorization Code with PKCE)
 - Token management with localStorage
 - Protected routes
@@ -92,4 +93,3 @@ This monorepo uses [Turbo](https://turbo.build/) for fast, cached builds and tas
 - Runs tasks in parallel when possible
 - Tracks dependencies between packages
 - Provides incremental builds
-

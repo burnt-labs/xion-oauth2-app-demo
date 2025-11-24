@@ -19,7 +19,9 @@ export function getRedirectUri(): string {
 
 export async function getOAuthServerInfo(): Promise<OAuthServerInfo> {
   const serverUrl = getOAuthServerUrl()
-  const response = await fetch(`${serverUrl}/.well-known/oauth-authorization-server`)
+  const response = await fetch(
+    `${serverUrl}/.well-known/oauth-authorization-server`
+  )
   if (!response.ok) {
     throw new Error('Failed to fetch OAuth server info')
   }
@@ -59,7 +61,7 @@ export async function startAuthorization(): Promise<void> {
   sessionStorage.setItem(STORAGE_KEY_CODE_VERIFIER, codeVerifier)
 
   const codeChallenge = await generateCodeChallenge(codeVerifier)
-  
+
   // Generate state parameter for CSRF protection
   const state = generateCodeVerifier()
   sessionStorage.setItem(STORAGE_KEY_STATE, state)
@@ -84,11 +86,13 @@ export async function exchangeCodeForToken(
   const serverInfo = await getOAuthServerInfo()
   const clientId = getClientId()
   const redirectUri = getRedirectUri()
-  
+
   // Retrieve PKCE code verifier from session storage
   const codeVerifier = sessionStorage.getItem(STORAGE_KEY_CODE_VERIFIER)
   if (!codeVerifier) {
-    throw new Error('Code verifier not found. Please restart the authorization flow.')
+    throw new Error(
+      'Code verifier not found. Please restart the authorization flow.'
+    )
   }
 
   // Verify state parameter for CSRF protection (if provided)
@@ -118,7 +122,9 @@ export async function exchangeCodeForToken(
   })
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Token exchange failed' }))
+    const error = await response
+      .json()
+      .catch(() => ({ error: 'Token exchange failed' }))
     sessionStorage.removeItem(STORAGE_KEY_CODE_VERIFIER)
     sessionStorage.removeItem(STORAGE_KEY_STATE)
     throw new Error(error.error || 'Token exchange failed')
@@ -136,7 +142,7 @@ export async function exchangeCodeForToken(
   }
 
   saveTokenInfo(tokenInfo)
-  
+
   // Clean up PKCE and state from session storage
   sessionStorage.removeItem(STORAGE_KEY_CODE_VERIFIER)
   sessionStorage.removeItem(STORAGE_KEY_STATE)
@@ -178,4 +184,3 @@ export function clearTokenInfo(): void {
 export function isAuthenticated(): boolean {
   return getTokenInfo() !== null
 }
-

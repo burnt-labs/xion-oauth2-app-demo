@@ -29,7 +29,11 @@ export function Dashboard() {
     }
   }, [])
 
-  const addLog = (type: ConsoleLog['type'], message: string, data?: unknown) => {
+  const addLog = (
+    type: ConsoleLog['type'],
+    message: string,
+    data?: unknown
+  ) => {
     const log: ConsoleLog = {
       timestamp: new Date().toLocaleTimeString(),
       type,
@@ -43,12 +47,13 @@ export function Dashboard() {
     try {
       setIsLoading(true)
       addLog('request', 'Testing transaction API...')
-      
+
       const response = await transactionApi.test()
-      
+
       addLog('response', 'API call successful', response)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
       addLog('error', `API call failed: ${errorMessage}`, error)
     } finally {
       setIsLoading(false)
@@ -70,7 +75,9 @@ export function Dashboard() {
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-black text-foreground">XION OAUTH2 DEMO</h1>
+            <h1 className="text-4xl font-black text-foreground">
+              XION OAUTH2 DEMO
+            </h1>
             <p className="mt-2 text-muted-foreground">
               OAuth2 authenticated dashboard
             </p>
@@ -139,14 +146,16 @@ export function Dashboard() {
                 {consoleLogs.map((log, index) => (
                   <div key={index} className="flex flex-col gap-1">
                     <div className="flex gap-2 items-center">
-                      <span className="text-muted-foreground">[{log.timestamp}]</span>
+                      <span className="text-muted-foreground">
+                        [{log.timestamp}]
+                      </span>
                       <span
                         className={
                           log.type === 'error'
                             ? 'text-red-500 font-semibold'
                             : log.type === 'request'
-                            ? 'text-yellow-500 font-semibold'
-                            : 'text-green-500 font-semibold'
+                              ? 'text-yellow-500 font-semibold'
+                              : 'text-green-500 font-semibold'
                         }
                       >
                         [{log.type.toUpperCase()}]
@@ -168,4 +177,3 @@ export function Dashboard() {
     </div>
   )
 }
-

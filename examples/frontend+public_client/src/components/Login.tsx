@@ -12,7 +12,9 @@ export function Login() {
       setError('')
       await startAuthorization()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start authorization')
+      setError(
+        err instanceof Error ? err.message : 'Failed to start authorization'
+      )
       setIsLoading(false)
     }
   }
@@ -54,4 +56,3 @@ export function Login() {
     </div>
   )
 }
-

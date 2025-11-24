@@ -36,7 +36,11 @@ export function Callback() {
         await exchangeCodeForToken(code, state || undefined)
         navigate('/dashboard', { replace: true })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to exchange code for token')
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to exchange code for token'
+        )
         setIsLoading(false)
       }
     }
@@ -48,7 +52,9 @@ export function Callback() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <div className="mb-4 text-lg text-muted-foreground">Processing authorization...</div>
+          <div className="mb-4 text-lg text-muted-foreground">
+            Processing authorization...
+          </div>
         </div>
       </div>
     )
@@ -59,7 +65,9 @@ export function Callback() {
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
         <div className="w-full max-w-md space-y-4">
           <div className="rounded-md border border-destructive bg-destructive/10 p-4">
-            <h2 className="mb-2 text-lg font-semibold text-destructive">Authorization Failed</h2>
+            <h2 className="mb-2 text-lg font-semibold text-destructive">
+              Authorization Failed
+            </h2>
             <p className="text-sm text-destructive">{error}</p>
           </div>
           <Button fullWidth onClick={() => navigate('/')}>
@@ -72,4 +80,3 @@ export function Callback() {
 
   return null
 }
-

@@ -29,10 +29,7 @@ export function App() {
           </PublicRoute>
         }
       />
-      <Route
-        path="/callback"
-        element={<Callback />}
-      />
+      <Route path="/callback" element={<Callback />} />
       <Route
         path="/dashboard"
         element={
@@ -45,4 +42,3 @@ export function App() {
     </Routes>
   )
 }
-

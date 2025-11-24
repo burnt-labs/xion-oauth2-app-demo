@@ -14,4 +14,3 @@ export interface InputProps
   error?: string
   parentClassName?: string
 }
-

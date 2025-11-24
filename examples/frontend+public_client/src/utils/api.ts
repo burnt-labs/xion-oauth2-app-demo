@@ -44,8 +44,9 @@ export const apiClient = createApiClient()
 
 export const transactionApi = {
   test: async (): Promise<ApiResponse> => {
-    const response = await apiClient.get<ApiResponse>('/api/v1/transaction/test')
+    const response = await apiClient.get<ApiResponse>(
+      '/api/v1/transaction/test'
+    )
     return response.data
   },
 }
-

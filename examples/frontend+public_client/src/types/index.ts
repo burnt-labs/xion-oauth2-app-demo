@@ -18,4 +18,3 @@ export interface ApiResponse<T = unknown> {
   error?: string
   data?: T
 }
-

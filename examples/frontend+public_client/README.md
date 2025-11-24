@@ -20,6 +20,7 @@ A frontend demo application showcasing Xion OAuth2 Client integration using stan
 **Location**: `examples/frontend+public_client/`
 
 **Features**:
+
 - Standard OAuth2 authorization flow (Authorization Code with PKCE)
 - Token management with localStorage
 - Protected routes
