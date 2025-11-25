@@ -124,7 +124,7 @@ export function Dashboard() {
               fullWidth
             >
               <TestTube className="mr-2 h-4 w-4" />
-              {isLoading ? 'Testing...' : 'Test Transaction API'}
+              {isLoading ? 'Testing...' : 'API: /api/v1/transaction/test'}
             </Button>
           </div>
         </div>
