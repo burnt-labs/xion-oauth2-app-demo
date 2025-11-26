@@ -16,6 +16,7 @@
   "dependencies": {
     "@burnt-labs/xion-types": "^25.0.1",
     "@cosmjs/math": "^0.37.0",
+    "@cosmjs/proto-signing": "^0.37.0",
     "@radix-ui/react-slot": "^1.2.4",
     "axios": "^1.8.2",
     "class-variance-authority": "^0.7.1",
