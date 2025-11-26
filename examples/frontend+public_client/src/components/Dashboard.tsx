@@ -3,14 +3,7 @@ import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { getTokenInfo, clearTokenInfo } from '@/utils/oauth'
 import { transactionApi } from '@/utils/api'
-import {
-  LogOut,
-  TestTube,
-  Send,
-  Info,
-  Terminal,
-  Menu as MenuIcon,
-} from 'lucide-react'
+import { LogOut, TestTube, Send, Info, Menu as MenuIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ConsoleLog {
@@ -345,9 +338,7 @@ export function Dashboard() {
               </div>
 
               {/* Right Form Area */}
-              <div className="flex-1 min-w-0">
-                {renderApiTestForm()}
-              </div>
+              <div className="flex-1 min-w-0">{renderApiTestForm()}</div>
             </div>
 
             {/* Bottom Section: Console */}
