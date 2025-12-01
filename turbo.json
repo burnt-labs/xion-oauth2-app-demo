@@ -1,0 +1,42 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env"],
+  "globalEnv": ["VITE_XION_OAUTH2_SERVER_URL", "VITE_XION_OAUTH2_CLIENT_ID"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": [".env.production.local", ".env.local", ".env.production", ".env"]
+    },
+    "test": {
+      "env": [".env.test.local", ".env.test", ".env"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "check-types": {},
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        ".env.development.local",
+        ".env.local",
+        ".env.development",
+        ".env"
+      ]
+    },
+    "preview": {
+      "cache": false,
+      "persistent": true
+    },
+    "format": {
+      "cache": false
+    },
+    "format:check": {
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}
