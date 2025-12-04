@@ -18,3 +18,25 @@ export interface ApiResponse<T = unknown> {
   error?: string
   data?: T
 }
+
+export interface Authenticator {
+  id: string
+  type: string
+  authenticator: string
+  authenticatorIndex: number
+}
+
+export interface Balance {
+  amount: string
+  denom: string
+  microAmount: string
+}
+
+export interface MeResponse {
+  id: string
+  authenticators: Authenticator[]
+  balances: {
+    xion: Balance
+    usdc: Balance
+  }
+}

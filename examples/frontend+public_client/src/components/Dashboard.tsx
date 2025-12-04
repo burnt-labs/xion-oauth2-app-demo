@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { getTokenInfo, clearTokenInfo } from '@/utils/oauth'
-import { transactionApi } from '@/utils/api'
-import { LogOut, TestTube, Send, Info, Menu as MenuIcon } from 'lucide-react'
+import { transactionApi, accountApi } from '@/utils/api'
+import { LogOut, Send, Info, Menu as MenuIcon, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { MeResponse } from '@/types'
 
 interface ConsoleLog {
   timestamp: string
@@ -13,9 +14,9 @@ interface ConsoleLog {
   data?: unknown
 }
 
-type MenuItem = 'token' | 'api-tests'
+type MenuItem = 'token' | 'account-query' | 'api-tests'
 
-type ApiTestSubMenu = 'quick-test' | 'send-tokens'
+type ApiTestSubMenu = 'send-tokens'
 
 interface MenuOption {
   id: MenuItem
@@ -26,25 +27,31 @@ interface MenuOption {
 const menuOptions: MenuOption[] = [
   { id: 'token', label: 'Token Info', icon: <Info className="h-4 w-4" /> },
   {
+    id: 'account-query',
+    label: 'Account Query',
+    icon: <User className="h-4 w-4" />,
+  },
+  {
     id: 'api-tests',
     label: 'API Tests',
-    icon: <TestTube className="h-4 w-4" />,
+    icon: <Send className="h-4 w-4" />,
   },
 ]
 
 const apiTestSubMenus: { id: ApiTestSubMenu; label: string }[] = [
-  { id: 'quick-test', label: 'Quick Test' },
   { id: 'send-tokens', label: 'Send Tokens' },
 ]
 
 export function Dashboard() {
   const [activeMenu, setActiveMenu] = useState<MenuItem>('token')
   const [activeApiTestSubMenu, setActiveApiTestSubMenu] =
-    useState<ApiTestSubMenu>('quick-test')
+    useState<ApiTestSubMenu>('send-tokens')
   const [tokenInfo, setTokenInfo] = useState(getTokenInfo())
   const [consoleLogs, setConsoleLogs] = useState<ConsoleLog[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isSendingTokens, setIsSendingTokens] = useState(false)
+  const [isLoadingAccount, setIsLoadingAccount] = useState(false)
+  const [accountData, setAccountData] = useState<MeResponse | null>(null)
   const [sendTokensForm, setSendTokensForm] = useState({
     toAddress: '',
     amount: '',
@@ -78,20 +85,22 @@ export function Dashboard() {
     setConsoleLogs((prev) => [...prev, log])
   }
 
-  const handleTestApi = async () => {
+  const handleQueryAccount = async () => {
     try {
-      setIsLoading(true)
-      addLog('request', 'Testing transaction API...')
+      setIsLoadingAccount(true)
+      addLog('request', 'Querying account information from /api/v1/me...')
 
-      const response = await transactionApi.test()
+      const response = await accountApi.getMe()
+      setAccountData(response)
 
-      addLog('response', 'API call successful', response)
+      addLog('response', 'Account information retrieved successfully', response)
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error'
-      addLog('error', `API call failed: ${errorMessage}`, error)
+      addLog('error', `Account query failed: ${errorMessage}`, error)
+      setAccountData(null)
     } finally {
-      setIsLoading(false)
+      setIsLoadingAccount(false)
     }
   }
 
@@ -150,36 +159,6 @@ export function Dashboard() {
 
   const renderApiTestForm = () => {
     switch (activeApiTestSubMenu) {
-      case 'quick-test':
-        return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-card-foreground">
-              Quick Test
-            </h3>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  API Endpoint
-                </label>
-                <div className="rounded-md border border-white/20 bg-input p-3">
-                  <span className="font-mono text-sm text-foreground">
-                    /api/v1/transaction/test
-                  </span>
-                </div>
-              </div>
-              <Button
-                onClick={handleTestApi}
-                disabled={isLoading}
-                variant="outline"
-                fullWidth
-              >
-                <TestTube className="mr-2 h-4 w-4" />
-                {isLoading ? 'Testing...' : 'Test API'}
-              </Button>
-            </div>
-          </div>
-        )
-
       case 'send-tokens':
         return (
           <div className="space-y-4">
@@ -306,6 +285,143 @@ export function Dashboard() {
                 No token information available
               </div>
             )}
+          </div>
+        )
+
+      case 'account-query':
+        return (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold text-card-foreground">
+              Account Query
+            </h2>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">
+                  API Endpoint
+                </label>
+                <div className="rounded-md border border-white/20 bg-input p-3">
+                  <span className="font-mono text-sm text-foreground">
+                    /api/v1/me
+                  </span>
+                </div>
+              </div>
+              <Button
+                onClick={handleQueryAccount}
+                disabled={isLoadingAccount}
+                variant="outline"
+                fullWidth
+              >
+                <User className="mr-2 h-4 w-4" />
+                {isLoadingAccount ? 'Querying...' : 'Query Account'}
+              </Button>
+
+              {accountData && (
+                <div className="space-y-6 mt-6">
+                  {/* Meta Account Address */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-card-foreground">
+                      Meta Account Address
+                    </label>
+                    <div className="rounded-md border border-white/20 bg-input p-3">
+                      <span className="font-mono text-sm text-foreground break-all">
+                        {accountData.id}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Balances */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-card-foreground">
+                      Balances
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="rounded-md border border-white/20 bg-input p-4">
+                        <div className="text-xs text-muted-foreground mb-1">
+                          XION
+                        </div>
+                        <div className="text-lg font-semibold text-foreground">
+                          {accountData.balances.xion.amount}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {accountData.balances.xion.denom} (
+                          {accountData.balances.xion.microAmount} micro)
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-white/20 bg-input p-4">
+                        <div className="text-xs text-muted-foreground mb-1">
+                          USDC
+                        </div>
+                        <div className="text-lg font-semibold text-foreground">
+                          {accountData.balances.usdc.amount}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {accountData.balances.usdc.denom} (
+                          {accountData.balances.usdc.microAmount} micro)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Authenticators */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-card-foreground">
+                      Authenticators ({accountData.authenticators.length})
+                    </label>
+                    {accountData.authenticators.length > 0 ? (
+                      <div className="space-y-2">
+                        {accountData.authenticators.map((auth, index) => (
+                          <div
+                            key={auth.id || index}
+                            className="rounded-md border border-white/20 bg-input p-4"
+                          >
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="text-muted-foreground">
+                                  Type:
+                                </span>{' '}
+                                <span className="text-foreground font-medium">
+                                  {auth.type}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">
+                                  Index:
+                                </span>{' '}
+                                <span className="text-foreground font-medium">
+                                  {auth.authenticatorIndex}
+                                </span>
+                              </div>
+                              <div className="col-span-2">
+                                <span className="text-muted-foreground">
+                                  Authenticator:
+                                </span>
+                                <div className="mt-1 font-mono text-xs break-all text-foreground">
+                                  {auth.authenticator}
+                                </div>
+                              </div>
+                              {auth.id && (
+                                <div className="col-span-2">
+                                  <span className="text-muted-foreground">
+                                    ID:
+                                  </span>
+                                  <div className="mt-1 font-mono text-xs break-all text-foreground">
+                                    {auth.id}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-md border border-white/20 bg-input p-4 text-muted-foreground">
+                        No authenticators found
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )
 

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 import { getTokenInfo, getOAuthServerUrl } from './oauth'
-import type { ApiResponse } from '@/types'
+import type { ApiResponse, MeResponse } from '@/types'
 import { createSendTokensMessage } from './transactions'
 
 const createApiClient = (): AxiosInstance => {
@@ -44,12 +44,6 @@ const createApiClient = (): AxiosInstance => {
 export const apiClient = createApiClient()
 
 export const transactionApi = {
-  test: async (): Promise<ApiResponse> => {
-    const response = await apiClient.get<ApiResponse>(
-      '/api/v1/transaction/test'
-    )
-    return response.data
-  },
   sendTokens: async (
     toAddress: string,
     amount: number,
@@ -59,6 +53,13 @@ export const transactionApi = {
     const response = await apiClient.post<ApiResponse>('/api/v1/transaction', {
       messages: [createSendTokensMessage(toAddress, amount, targetDenom)],
     })
+    return response.data
+  },
+}
+
+export const accountApi = {
+  getMe: async (): Promise<MeResponse> => {
+    const response = await apiClient.get<MeResponse>('/api/v1/me')
     return response.data
   },
 }
