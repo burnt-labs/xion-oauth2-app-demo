@@ -164,15 +164,18 @@ export function getTokenInfo(): TokenInfo | null {
   }
 
   const expirationTime = parseInt(expiration, 10)
+
   if (Date.now() >= expirationTime) {
     clearTokenInfo()
     return null
   }
 
+  const expiresIn = Math.floor((expirationTime - Date.now()) / 1000)
+
   return {
     accessToken,
     expiration: expirationTime,
-    expiresIn: Math.floor((expirationTime - Date.now()) / 1000),
+    expiresIn: expiresIn > 0 ? expiresIn : 0,
   }
 }
 

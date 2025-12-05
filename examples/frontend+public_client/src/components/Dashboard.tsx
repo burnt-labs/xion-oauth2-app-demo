@@ -38,6 +38,27 @@ const apiTestSubMenus: { id: ApiTestSubMenu; label: string }[] = [
   { id: 'send-tokens', label: 'Send Tokens' },
 ]
 
+function formatExpiresIn(seconds: number): string {
+  // Handle invalid or negative values
+  if (!seconds || seconds < 0) {
+    return 'Expired'
+  }
+
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+
+  const parts: string[] = []
+  if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`)
+  if (hours > 0) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`)
+  if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`)
+  if (secs > 0 && parts.length === 0)
+    parts.push(`${secs} second${secs > 1 ? 's' : ''}`)
+
+  return parts.length > 0 ? parts.join(', ') : '0 seconds'
+}
+
 export function Dashboard() {
   const [activeMenu, setActiveMenu] = useState<MenuItem>('token')
   const [activeApiTestSubMenu, setActiveApiTestSubMenu] =
@@ -60,7 +81,7 @@ export function Dashboard() {
       addLog('error', 'No valid token found. Please login again.')
     } else {
       addLog('response', 'Token loaded successfully', {
-        expiresIn: `${Math.floor(info.expiresIn / 60)} minutes`,
+        expiresIn: formatExpiresIn(info.expiresIn),
         expiration: new Date(info.expiration).toLocaleString(),
       })
     }
@@ -397,7 +418,7 @@ export function Dashboard() {
                   </label>
                   <div className="rounded-md border border-white/20 bg-input p-3">
                     <span className="text-foreground">
-                      {Math.floor(tokenInfo.expiresIn / 60)} minutes
+                      {formatExpiresIn(tokenInfo.expiresIn)}
                     </span>
                   </div>
                 </div>
