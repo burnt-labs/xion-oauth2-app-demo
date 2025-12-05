@@ -261,41 +261,36 @@ export function Dashboard() {
                             key={auth.id || index}
                             className="rounded-md border border-white/20 bg-input p-4"
                           >
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                              <div>
-                                <span className="text-muted-foreground">
-                                  Type:
-                                </span>{' '}
-                                <span className="text-foreground font-medium">
-                                  {auth.type}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">
-                                  Index:
-                                </span>{' '}
-                                <span className="text-foreground font-medium">
-                                  {auth.authenticatorIndex}
-                                </span>
-                              </div>
-                              <div className="col-span-2">
-                                <span className="text-muted-foreground">
-                                  Authenticator:
-                                </span>
-                                <div className="mt-1 font-mono text-xs break-all text-foreground">
-                                  {auth.authenticator}
-                                </div>
-                              </div>
-                              {auth.id && (
-                                <div className="col-span-2">
+                            <div className="space-y-3 text-sm">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
                                   <span className="text-muted-foreground">
-                                    ID:
+                                    Type:
+                                  </span>{' '}
+                                  <span className="text-foreground font-medium">
+                                    {auth.type}
                                   </span>
-                                  <div className="mt-1 font-mono text-xs break-all text-foreground">
-                                    {auth.id}
-                                  </div>
                                 </div>
-                              )}
+                                <div>
+                                  <span className="text-muted-foreground">
+                                    Index:
+                                  </span>{' '}
+                                  <span className="text-foreground font-medium">
+                                    {auth.index}
+                                  </span>
+                                </div>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">
+                                  Data:
+                                </span>
+                                <textarea
+                                  readOnly
+                                  value={JSON.stringify(auth.data, null, 2)}
+                                  className="mt-1 w-full rounded-md border border-white/20 bg-[#0A0A0A]/80 px-3 py-2 font-mono text-xs text-foreground resize-none focus-visible:outline-none focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                  rows={6}
+                                />
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -470,7 +465,7 @@ export function Dashboard() {
               </div>
 
               {/* Right Form Area */}
-              <div className="flex-1 min-w-0">{renderApiTestForm()}</div>
+              <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar pr-2">{renderApiTestForm()}</div>
             </div>
 
             {/* Bottom Section: Console */}

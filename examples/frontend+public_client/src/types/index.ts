@@ -22,8 +22,8 @@ export interface ApiResponse<T = unknown> {
 export interface Authenticator {
   id: string
   type: string
-  authenticator: string
-  authenticatorIndex: number
+  index: number
+  data: Record<string, unknown>
 }
 
 export interface Balance {
