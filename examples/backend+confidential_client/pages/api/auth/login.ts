@@ -16,7 +16,7 @@ export default async function handler(
   try {
     const serverInfo = await getOAuthServerInfo()
     const clientId = getClientId()
-    const redirectUri = getRedirectUri()
+    const redirectUri = getRedirectUri(req)
 
     // Generate state parameter for CSRF protection
     const state = generateRandomString()

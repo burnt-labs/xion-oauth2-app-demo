@@ -1,19 +1,19 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env"],
-  "globalEnv": ["VITE_XION_OAUTH2_SERVER_URL", "VITE_XION_OAUTH2_CLIENT_ID"],
+  "globalEnv": [
+    "VITE_XION_OAUTH2_SERVER_URL",
+    "NEXT_PUBLIC_XION_OAUTH2_SERVER_URL",
+    "XION_OAUTH2_CLIENT_ID",
+    "XION_OAUTH2_CLIENT_SECRET"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
       "env": [".env.production.local", ".env.local", ".env.production", ".env"]
     },
-    "test": {
-      "env": [".env.test.local", ".env.test", ".env"]
-    },
-    "lint": {
-      "dependsOn": ["^build"]
-    },
+    "lint": {},
     "check-types": {},
     "dev": {
       "cache": false,

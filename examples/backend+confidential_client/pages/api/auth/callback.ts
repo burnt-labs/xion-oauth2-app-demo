@@ -42,7 +42,7 @@ export default async function handler(
     const serverInfo = await getOAuthServerInfo()
     const clientId = getClientId()
     const clientSecret = getClientSecret()
-    const redirectUri = getRedirectUri()
+    const redirectUri = getRedirectUri(req)
 
     // Exchange authorization code for access token using Confidential Client flow
     // Using client_id and client_secret as form parameters (OAuth2 standard)

@@ -72,14 +72,11 @@ cp .env.example .env
 
 ```env
 # OAuth2 Server Configuration
-XION_OAUTH2_SERVER_URL=http://localhost:8787
+NEXT_PUBLIC_XION_OAUTH2_SERVER_URL=http://localhost:8787
 
 # OAuth2 Client Configuration (Confidential Client)
 XION_OAUTH2_CLIENT_ID=your_client_id_here
 XION_OAUTH2_CLIENT_SECRET=your_client_secret_here
-
-# Application URL
-NEXT_PUBLIC_APP_URL=http://localhost:3003
 ```
 
 ### Development

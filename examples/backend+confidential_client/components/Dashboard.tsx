@@ -64,7 +64,8 @@ export function Dashboard() {
   const [activeMenu, setActiveMenu] = useState<MenuItem>('token')
   const [activeApiTestSubMenu, setActiveApiTestSubMenu] =
     useState<ApiTestSubMenu>('account-query')
-  const [tokenInfo, setTokenInfo] = useState(getTokenInfo())
+  // Only initialize tokenInfo on client to avoid hydration mismatch
+  const [tokenInfo, setTokenInfo] = useState<ReturnType<typeof getTokenInfo> | null>(null)
   const [consoleLogs, setConsoleLogs] = useState<ConsoleLog[]>([])
   const [isSendingTokens, setIsSendingTokens] = useState(false)
   const [isLoadingAccount, setIsLoadingAccount] = useState(false)
@@ -76,6 +77,7 @@ export function Dashboard() {
   })
 
   useEffect(() => {
+    // Only run on client side
     const info = getTokenInfo()
     setTokenInfo(info)
     if (!info) {
