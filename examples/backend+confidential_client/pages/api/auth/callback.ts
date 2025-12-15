@@ -37,12 +37,15 @@ export default async function handler(
     res.setHeader('Set-Cookie', [
       'oauth_state=; Path=/; Max-Age=0',
       'oauth_code_verifier=; Path=/; Max-Age=0',
+      'oauth_use_pkce=; Path=/; Max-Age=0',
     ])
     return res.redirect('/?error=invalid_state')
   }
 
-  // Retrieve PKCE code verifier if present
-  const codeVerifier = req.cookies.oauth_code_verifier
+  // Check if PKCE was used in the authorization request
+  const usePkce = req.cookies.oauth_use_pkce === 'true'
+  // Retrieve PKCE code verifier only if PKCE was used
+  const codeVerifier = usePkce ? req.cookies.oauth_code_verifier : undefined
 
   try {
     const serverInfo = await getOAuthServerInfo()
@@ -59,8 +62,8 @@ export default async function handler(
       client_secret: clientSecret,
     })
 
-    // Include PKCE code_verifier when available
-    if (codeVerifier) {
+    // Include PKCE code_verifier only if PKCE was used in authorization request
+    if (usePkce && codeVerifier) {
       params.set('code_verifier', codeVerifier)
     }
 
@@ -88,10 +91,11 @@ export default async function handler(
     const expiresIn = tokens.expires_in || 3600
     const expiration = Date.now() + expiresIn * 1000
 
-    // Clear state cookie
+    // Clear state and PKCE cookies
     res.setHeader('Set-Cookie', [
       'oauth_state=; Path=/; Max-Age=0',
       'oauth_code_verifier=; Path=/; Max-Age=0',
+      'oauth_use_pkce=; Path=/; Max-Age=0',
     ])
 
     // Redirect to callback page with token info in URL hash (client-side will handle storage)
@@ -110,6 +114,7 @@ export default async function handler(
     res.setHeader('Set-Cookie', [
       'oauth_state=; Path=/; Max-Age=0',
       'oauth_code_verifier=; Path=/; Max-Age=0',
+      'oauth_use_pkce=; Path=/; Max-Age=0',
     ])
     res.redirect(
       `/?error=${encodeURIComponent(

@@ -22,15 +22,29 @@ export default async function handler(
     // Generate state parameter for CSRF protection
     const state = generateRandomString()
 
-    // Generate PKCE code verifier and challenge
-    const codeVerifier = generateCodeVerifier()
-    const codeChallenge = generateCodeChallenge(codeVerifier)
+    // Check if PKCE should be used (when code_challenge is sent)
+    const usePkce = false // Set to true when uncommenting code_challenge lines below
+
+    // Generate PKCE code verifier and challenge only if PKCE is used
+    let codeVerifier: string | undefined
+    let codeChallenge: string | undefined
+    if (usePkce) {
+      codeVerifier = generateCodeVerifier()
+      codeChallenge = generateCodeChallenge(codeVerifier)
+    }
 
     // Store state and PKCE verifier in cookies (in production, use httpOnly, secure cookies)
     const cookies = [
       `oauth_state=${state}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`,
-      `oauth_code_verifier=${codeVerifier}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`,
     ]
+    if (codeVerifier) {
+      cookies.push(
+        `oauth_code_verifier=${codeVerifier}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`
+      )
+      cookies.push(
+        `oauth_use_pkce=true; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`
+      )
+    }
     res.setHeader('Set-Cookie', cookies)
 
     // Build authorization URL with PKCE parameters
@@ -40,8 +54,10 @@ export default async function handler(
     authUrl.searchParams.set('response_type', 'code')
     authUrl.searchParams.set('scope', 'xion:transactions:submit')
     authUrl.searchParams.set('state', state)
-    authUrl.searchParams.set('code_challenge', codeChallenge)
-    authUrl.searchParams.set('code_challenge_method', 'S256')
+    if (usePkce && codeChallenge) {
+      authUrl.searchParams.set('code_challenge', codeChallenge)
+      authUrl.searchParams.set('code_challenge_method', 'S256')
+    }
 
     res.redirect(authUrl.toString())
   } catch (error) {
