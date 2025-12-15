@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
-import { getTokenInfo, clearTokenInfo } from '@/utils/oauth'
-import { transactionApi, accountApi } from '@/utils/api'
 import { LogOut, Send, Info, Menu as MenuIcon, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MeResponse } from '@/types'
+import { getTokenInfo, clearTokenInfo } from '@/lib/utils/oauth'
+import { accountApi, transactionApi } from '@/lib/utils/api'
 
 interface ConsoleLog {
   timestamp: string
@@ -39,7 +40,6 @@ const apiTestSubMenus: { id: ApiTestSubMenu; label: string }[] = [
 ]
 
 function formatExpiresIn(seconds: number): string {
-  // Handle invalid or negative values
   if (!seconds || seconds < 0) {
     return 'Expired'
   }
@@ -60,10 +60,12 @@ function formatExpiresIn(seconds: number): string {
 }
 
 export function Dashboard() {
+  const router = useRouter()
   const [activeMenu, setActiveMenu] = useState<MenuItem>('token')
   const [activeApiTestSubMenu, setActiveApiTestSubMenu] =
     useState<ApiTestSubMenu>('account-query')
-  const [tokenInfo, setTokenInfo] = useState(getTokenInfo())
+  // Only initialize tokenInfo on client to avoid hydration mismatch
+  const [tokenInfo, setTokenInfo] = useState<ReturnType<typeof getTokenInfo> | null>(null)
   const [consoleLogs, setConsoleLogs] = useState<ConsoleLog[]>([])
   const [isSendingTokens, setIsSendingTokens] = useState(false)
   const [isLoadingAccount, setIsLoadingAccount] = useState(false)
@@ -75,17 +77,19 @@ export function Dashboard() {
   })
 
   useEffect(() => {
+    // Only run on client side
     const info = getTokenInfo()
     setTokenInfo(info)
     if (!info) {
       addLog('error', 'No valid token found. Please login again.')
+      router.push('/')
     } else {
       addLog('response', 'Token loaded successfully', {
         expiresIn: formatExpiresIn(info.expiresIn),
         expiration: new Date(info.expiration).toLocaleString(),
       })
     }
-  }, [])
+  }, [router])
 
   const addLog = (
     type: ConsoleLog['type'],
@@ -148,7 +152,6 @@ export function Dashboard() {
 
       addLog('response', 'Tokens sent successfully', response)
 
-      // Reset form on success
       setSendTokensForm({
         toAddress: '',
         amount: '',
@@ -166,7 +169,7 @@ export function Dashboard() {
   const handleLogout = () => {
     clearTokenInfo()
     addLog('response', 'Logged out successfully')
-    window.location.href = '/'
+    router.push('/')
   }
 
   const clearConsole = () => {
@@ -204,7 +207,6 @@ export function Dashboard() {
 
               {accountData && (
                 <div className="space-y-6 mt-6">
-                  {/* Meta Account Address */}
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-card-foreground">
                       Meta Account Address
@@ -216,7 +218,6 @@ export function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Balances */}
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-card-foreground">
                       Balances
@@ -249,7 +250,6 @@ export function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Authenticators */}
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-card-foreground">
                       Authenticators ({accountData.authenticators.length})
@@ -439,9 +439,7 @@ export function Dashboard() {
       case 'api-tests':
         return (
           <div className="flex flex-col h-full space-y-6">
-            {/* Top Section: APIs Section with left submenu and right form */}
             <div className="flex-1 flex gap-6 min-h-0">
-              {/* Left Submenu */}
               <div className="w-48 border-r border-white/20 pr-6">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">
                   APIs Section
@@ -464,11 +462,11 @@ export function Dashboard() {
                 </nav>
               </div>
 
-              {/* Right Form Area */}
-              <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar pr-2">{renderApiTestForm()}</div>
+              <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar pr-2">
+                {renderApiTestForm()}
+              </div>
             </div>
 
-            {/* Bottom Section: Console */}
             <div className="flex-shrink-0 border-t border-white/20 pt-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-card-foreground">
@@ -524,7 +522,6 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <div className="flex h-screen">
-        {/* Left Sidebar Menu */}
         <div className="w-64 border-r border-white/20 bg-card flex flex-col">
           <div className="p-6 border-b border-white/20">
             <div className="flex items-center gap-2 mb-2">
@@ -567,7 +564,6 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Right Content Area */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-8 h-full">
             <div className="max-w-6xl mx-auto h-full">

@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
 import { getTokenInfo, getOAuthServerUrl } from './oauth'
 import type { ApiResponse, MeResponse } from '@/types'
-import { createSendTokensMessage } from './transactions'
+import { createSendTokensMessage } from '../transactions'
 
 const createApiClient = (): AxiosInstance => {
   const apiClient = axios.create({
