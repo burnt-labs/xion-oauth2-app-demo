@@ -34,15 +34,35 @@ export default async function handler(
   // Verify state parameter
   const storedState = req.cookies.oauth_state
   if (!storedState || storedState !== state) {
-    res.setHeader('Set-Cookie', 'oauth_state=; Path=/; Max-Age=0')
+    res.setHeader('Set-Cookie', [
+      'oauth_state=; Path=/; Max-Age=0',
+      'oauth_code_verifier=; Path=/; Max-Age=0',
+    ])
     return res.redirect('/?error=invalid_state')
   }
+
+  // Retrieve PKCE code verifier if present
+  const codeVerifier = req.cookies.oauth_code_verifier
 
   try {
     const serverInfo = await getOAuthServerInfo()
     const clientId = getClientId()
     const clientSecret = getClientSecret()
     const redirectUri = getRedirectUri(req)
+
+    // Prepare token request parameters
+    const params = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code as string,
+      redirect_uri: redirectUri,
+      client_id: clientId,
+      client_secret: clientSecret,
+    })
+
+    // Include PKCE code_verifier when available
+    if (codeVerifier) {
+      params.set('code_verifier', codeVerifier)
+    }
 
     // Exchange authorization code for access token using Confidential Client flow
     // Using client_id and client_secret as form parameters (OAuth2 standard)
@@ -51,18 +71,17 @@ export default async function handler(
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code as string,
-        redirect_uri: redirectUri,
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
+      body: params,
     })
 
     if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.json().catch(() => ({}))
-      throw new Error(errorData.error || 'Token exchange failed')
+      const errorData = await tokenResponse
+        .json()
+        .catch(() => ({ error: 'Token exchange failed' }))
+      const errorMessage = errorData.error
+        ? `[${errorData.error}] ${errorData.error_description}`
+        : 'Token exchange failed'
+      throw new Error(errorMessage)
     }
 
     const tokens = await tokenResponse.json()
@@ -70,7 +89,10 @@ export default async function handler(
     const expiration = Date.now() + expiresIn * 1000
 
     // Clear state cookie
-    res.setHeader('Set-Cookie', 'oauth_state=; Path=/; Max-Age=0')
+    res.setHeader('Set-Cookie', [
+      'oauth_state=; Path=/; Max-Age=0',
+      'oauth_code_verifier=; Path=/; Max-Age=0',
+    ])
 
     // Redirect to callback page with token info in URL hash (client-side will handle storage)
     // Using hash instead of query to avoid exposing token in server logs
@@ -85,7 +107,10 @@ export default async function handler(
     res.redirect(`/callback?token=${tokenData}`)
   } catch (error) {
     console.error('Callback error:', error)
-    res.setHeader('Set-Cookie', 'oauth_state=; Path=/; Max-Age=0')
+    res.setHeader('Set-Cookie', [
+      'oauth_state=; Path=/; Max-Age=0',
+      'oauth_code_verifier=; Path=/; Max-Age=0',
+    ])
     res.redirect(
       `/?error=${encodeURIComponent(
         error instanceof Error ? error.message : 'Token exchange failed'

@@ -4,6 +4,7 @@ import {
   getClientId,
   getRedirectUri,
 } from '@/lib/oauth-config'
+import { createHash } from 'crypto'
 
 export default async function handler(
   req: NextApiRequest,
@@ -21,19 +22,26 @@ export default async function handler(
     // Generate state parameter for CSRF protection
     const state = generateRandomString()
 
-    // Store state in a cookie (in production, use httpOnly, secure cookies)
-    res.setHeader(
-      'Set-Cookie',
-      `oauth_state=${state}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`
-    )
+    // Generate PKCE code verifier and challenge
+    const codeVerifier = generateCodeVerifier()
+    const codeChallenge = generateCodeChallenge(codeVerifier)
 
-    // Build authorization URL
+    // Store state and PKCE verifier in cookies (in production, use httpOnly, secure cookies)
+    const cookies = [
+      `oauth_state=${state}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`,
+      `oauth_code_verifier=${codeVerifier}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`,
+    ]
+    res.setHeader('Set-Cookie', cookies)
+
+    // Build authorization URL with PKCE parameters
     const authUrl = new URL(serverInfo.authorization_endpoint)
     authUrl.searchParams.set('client_id', clientId)
     authUrl.searchParams.set('redirect_uri', redirectUri)
     authUrl.searchParams.set('response_type', 'code')
     authUrl.searchParams.set('scope', 'xion:transactions:submit')
     authUrl.searchParams.set('state', state)
+    authUrl.searchParams.set('code_challenge', codeChallenge)
+    authUrl.searchParams.set('code_challenge_method', 'S256')
 
     res.redirect(authUrl.toString())
   } catch (error) {
@@ -62,4 +70,13 @@ function generateRandomString(): string {
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=/g, '')
+}
+
+function generateCodeVerifier(): string {
+  return generateRandomString()
+}
+
+function generateCodeChallenge(verifier: string): string {
+  const hash = createHash('sha256').update(verifier).digest('base64')
+  return hash.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
