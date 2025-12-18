@@ -1,6 +1,7 @@
 export function getOAuthServerUrl(): string {
   const baseUrl =
-    process.env.NEXT_PUBLIC_XION_OAUTH2_SERVER_URL || 'http://localhost:8787'
+    process.env.NEXT_PUBLIC_XION_OAUTH2_SERVER_URL ||
+    'https://oauth2.testnet.burnt.com/'
   // check if baseUrl is a valid URL
   try {
     new URL(baseUrl)

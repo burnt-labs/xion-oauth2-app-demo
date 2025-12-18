@@ -6,7 +6,10 @@ const STORAGE_KEY_CODE_VERIFIER = 'xion_oauth_code_verifier'
 const STORAGE_KEY_STATE = 'xion_oauth_state'
 
 export function getOAuthServerUrl(): string {
-  return import.meta.env.VITE_XION_OAUTH2_SERVER_URL || 'http://localhost:8787'
+  return (
+    import.meta.env.VITE_XION_OAUTH2_SERVER_URL ||
+    'https://oauth2.testnet.burnt.com/'
+  )
 }
 
 export function getClientId(): string {
