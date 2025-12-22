@@ -45,8 +45,5 @@ export function createInstantiateCW20ContractMessage(
     msg: new TextEncoder().encode(JSON.stringify(cw20InstantiateMsg)),
     funds: [], // Initial funds to send to contract
   })
-  return {
-    typeUrl: MsgInstantiateContract.typeUrl,
-    value: msg,
-  }
+  return MsgInstantiateContract.toProtoMsg(msg)
 }

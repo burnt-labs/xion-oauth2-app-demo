@@ -18,8 +18,8 @@ importers:
   examples/backend+confidential_client:
     dependencies:
       '@burnt-labs/xion-types':
-        specifier: ^25.0.1
-        version: 25.0.1(@chain-registry/v2-types@0.53.146)(@chain-registry/v2@1.71.237)(google-protobuf@3.21.4)(react@18.3.1)
+        specifier: ^25.0.2
+        version: 25.0.2(@chain-registry/v2-types@0.53.146)(@chain-registry/v2@1.71.237)(google-protobuf@3.21.4)(react@18.3.1)
       '@cosmjs/math':
         specifier: ^0.37.0
         version: 0.37.0
@@ -837,6 +837,9 @@ packages:
 
   '@burnt-labs/xion-types@25.0.1':
     resolution: {integrity: sha512-aw9BeBXhni2tnWXF9FcXMkjYXQXufxjMY/Ur8d3wYNNu8yqTlHipq4xbxEjhsGf3xje78SM8vdXpYJunrkUG4w==}
+
+  '@burnt-labs/xion-types@25.0.2':
+    resolution: {integrity: sha512-mlOfHrOtSZIW/6ilyLz84HU45ZDo2Ix6MC7QcelMRmzkOFF5EaWccLKrnNz245Wn0PhEJSnP8414yGjkg4ZEIQ==}
 
   '@chain-registry/v2-types@0.53.146':
     resolution: {integrity: sha512-GnqdNnEJ+ZTAc/0S9fQbwL5GpIvF3LZ/P3o6qh6EyITSiRA1Y55FXs59eSddltpPX5EgyWDwNpJjY+Q5uYlAkA==}
@@ -4969,6 +4972,29 @@ snapshots:
   '@bufbuild/protobuf@2.10.1': {}
 
   '@burnt-labs/xion-types@25.0.1(@chain-registry/v2-types@0.53.146)(@chain-registry/v2@1.71.237)(google-protobuf@3.21.4)(react@18.3.1)':
+    dependencies:
+      '@bufbuild/protobuf': 2.10.1
+      '@cosmology/lcd': 0.14.5
+      '@cosmology/telescope': 1.12.20
+      '@improbable-eng/grpc-web': 0.15.0(google-protobuf@3.21.4)
+      '@interchainjs/cosmos': 1.11.5(@chain-registry/v2-types@0.53.146)(@chain-registry/v2@1.71.237)
+      '@interchainjs/cosmos-types': 1.11.5(@chain-registry/v2-types@0.53.146)(@chain-registry/v2@1.71.237)
+      '@interchainjs/encoding': 1.11.5
+      '@interchainjs/pubkey': 1.11.5(@chain-registry/v2-types@0.53.146)(@chain-registry/v2@1.71.237)
+      '@interchainjs/types': 1.11.5
+      '@interchainjs/utils': 1.11.5(@chain-registry/v2-types@0.53.146)(@chain-registry/v2@1.71.237)
+      '@tanstack/react-query': 5.90.10(react@18.3.1)
+    transitivePeerDependencies:
+      - '@chain-registry/v2'
+      - '@chain-registry/v2-types'
+      - bufferutil
+      - debug
+      - google-protobuf
+      - react
+      - supports-color
+      - utf-8-validate
+
+  '@burnt-labs/xion-types@25.0.2(@chain-registry/v2-types@0.53.146)(@chain-registry/v2@1.71.237)(google-protobuf@3.21.4)(react@18.3.1)':
     dependencies:
       '@bufbuild/protobuf': 2.10.1
       '@cosmology/lcd': 0.14.5

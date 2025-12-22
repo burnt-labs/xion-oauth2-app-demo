@@ -205,18 +205,13 @@ export function Dashboard() {
       return
     }
 
-    // Validate initial balances
+    // Validate and filter initial balances (can be empty)
     const validInitialBalances = instantiateContractForm.initialBalances
       .filter((balance) => balance.address.trim() && balance.amount.trim())
       .map((balance) => ({
         address: balance.address.trim(),
         amount: balance.amount.trim(),
       }))
-
-    if (validInitialBalances.length === 0) {
-      addLog('error', 'Please add at least one initial balance')
-      return
-    }
 
     const CODE_ID_TESTNET = 510
 
