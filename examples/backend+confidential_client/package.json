@@ -13,7 +13,7 @@
     "clean": "rm -rf .next .turbo"
   },
   "dependencies": {
-    "@burnt-labs/xion-types": "^25.0.1",
+    "@burnt-labs/xion-types": "^25.0.2",
     "@cosmjs/math": "^0.37.0",
     "@cosmjs/proto-signing": "^0.37.0",
     "@radix-ui/react-slot": "^1.2.4",

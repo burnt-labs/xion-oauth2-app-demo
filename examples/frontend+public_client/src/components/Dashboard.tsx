@@ -3,7 +3,16 @@ import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { getTokenInfo, clearTokenInfo } from '@/utils/oauth'
 import { transactionApi, accountApi } from '@/utils/api'
-import { LogOut, Send, Info, Menu as MenuIcon, User } from 'lucide-react'
+import {
+  LogOut,
+  Send,
+  Info,
+  Menu as MenuIcon,
+  User,
+  FileCode,
+  Plus,
+  Trash2,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MeResponse } from '@/types'
 
@@ -16,7 +25,7 @@ interface ConsoleLog {
 
 type MenuItem = 'token' | 'api-tests'
 
-type ApiTestSubMenu = 'account-query' | 'send-tokens'
+type ApiTestSubMenu = 'account-query' | 'send-tokens' | 'instantiate-contract'
 
 interface MenuOption {
   id: MenuItem
@@ -36,6 +45,7 @@ const menuOptions: MenuOption[] = [
 const apiTestSubMenus: { id: ApiTestSubMenu; label: string }[] = [
   { id: 'account-query', label: 'Account Query' },
   { id: 'send-tokens', label: 'Send Tokens' },
+  { id: 'instantiate-contract', label: 'Instantiate Contract' },
 ]
 
 function formatExpiresIn(seconds: number): string {
@@ -72,6 +82,16 @@ export function Dashboard() {
     toAddress: '',
     amount: '',
     denom: 'uxion',
+  })
+  const [isInstantiatingContract, setIsInstantiatingContract] = useState(false)
+  const [instantiateContractForm, setInstantiateContractForm] = useState({
+    name: '',
+    symbol: '',
+    decimals: '6',
+    initialBalances: [{ address: '', amount: '' }] as {
+      address: string
+      amount: string
+    }[],
   })
 
   useEffect(() => {
@@ -161,6 +181,109 @@ export function Dashboard() {
     } finally {
       setIsSendingTokens(false)
     }
+  }
+
+  const handleInstantiateContract = async () => {
+    if (!accountData?.id) {
+      addLog('error', 'Please query account information first to get Meta Account Address')
+      return
+    }
+
+    if (!instantiateContractForm.name.trim()) {
+      addLog('error', 'Please enter a token name')
+      return
+    }
+
+    if (!instantiateContractForm.symbol.trim()) {
+      addLog('error', 'Please enter a token symbol')
+      return
+    }
+
+    const decimals = parseInt(instantiateContractForm.decimals)
+    if (isNaN(decimals) || decimals < 0) {
+      addLog('error', 'Please enter a valid decimals value (0 or greater)')
+      return
+    }
+
+    // Validate and filter initial balances (can be empty)
+    const validInitialBalances = instantiateContractForm.initialBalances
+      .filter((balance) => balance.address.trim() && balance.amount.trim())
+      .map((balance) => ({
+        address: balance.address.trim(),
+        amount: balance.amount.trim(),
+      }))
+
+    const CODE_ID_TESTNET = 510
+
+    try {
+      setIsInstantiatingContract(true)
+      addLog('request', 'Instantiating CW20 contract...', {
+        creatorAddress: accountData.id,
+        codeId: CODE_ID_TESTNET,
+        name: instantiateContractForm.name,
+        symbol: instantiateContractForm.symbol,
+        decimals,
+        initialBalances: validInitialBalances,
+      })
+
+      const response = await transactionApi.instantiateContractCW20(
+        accountData.id,
+        instantiateContractForm.name.trim(),
+        instantiateContractForm.symbol.trim(),
+        decimals,
+        validInitialBalances
+      )
+
+      addLog('response', 'CW20 contract instantiated successfully', response)
+
+      // Reset form on success
+      setInstantiateContractForm({
+        name: '',
+        symbol: '',
+        decimals: '6',
+        initialBalances: [{ address: '', amount: '' }],
+      })
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
+      addLog('error', `Instantiate contract failed: ${errorMessage}`, error)
+    } finally {
+      setIsInstantiatingContract(false)
+    }
+  }
+
+  const addInitialBalance = () => {
+    setInstantiateContractForm({
+      ...instantiateContractForm,
+      initialBalances: [
+        ...instantiateContractForm.initialBalances,
+        { address: '', amount: '' },
+      ],
+    })
+  }
+
+  const removeInitialBalance = (index: number) => {
+    if (instantiateContractForm.initialBalances.length > 1) {
+      setInstantiateContractForm({
+        ...instantiateContractForm,
+        initialBalances: instantiateContractForm.initialBalances.filter(
+          (_, i) => i !== index
+        ),
+      })
+    }
+  }
+
+  const updateInitialBalance = (
+    index: number,
+    field: 'address' | 'amount',
+    value: string
+  ) => {
+    const newBalances = [...instantiateContractForm.initialBalances]
+    newBalances[index] = { ...newBalances[index], [field]: value }
+    setInstantiateContractForm({
+      ...instantiateContractForm,
+      initialBalances: newBalances,
+    })
   }
 
   const handleLogout = () => {
@@ -377,6 +500,181 @@ export function Dashboard() {
               >
                 <Send className="mr-2 h-4 w-4" />
                 {isSendingTokens ? 'Sending...' : 'Send Tokens'}
+              </Button>
+            </div>
+          </div>
+        )
+
+      case 'instantiate-contract':
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-card-foreground">
+              Instantiate CW20 Contract
+            </h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-card-foreground">
+                  Creator Address (Meta Account)
+                </label>
+                <div className="rounded-md border border-white/20 bg-input p-3">
+                  <span className="font-mono text-sm text-foreground break-all">
+                    {accountData?.id || 'Please query account information first'}
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-card-foreground">
+                  Code ID (Testnet)
+                </label>
+                <div className="rounded-md border border-white/20 bg-input p-3">
+                  <span className="font-mono text-sm text-foreground">510</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-card-foreground">
+                  Decimals
+                </label>
+                <Input
+                  type="number"
+                  placeholder="6"
+                  value={instantiateContractForm.decimals}
+                  onChange={(e) =>
+                    setInstantiateContractForm({
+                      ...instantiateContractForm,
+                      decimals: e.target.value,
+                    })
+                  }
+                  disabled={isInstantiatingContract}
+                  min="0"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-card-foreground">
+                    Token Name
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="My Token"
+                    value={instantiateContractForm.name}
+                    onChange={(e) =>
+                      setInstantiateContractForm({
+                        ...instantiateContractForm,
+                        name: e.target.value,
+                      })
+                    }
+                    disabled={isInstantiatingContract}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-card-foreground">
+                    Token Symbol
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="MTK"
+                    value={instantiateContractForm.symbol}
+                    onChange={(e) =>
+                      setInstantiateContractForm({
+                        ...instantiateContractForm,
+                        symbol: e.target.value,
+                      })
+                    }
+                    disabled={isInstantiatingContract}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-card-foreground">
+                    Initial Balances
+                  </label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={addInitialBalance}
+                    disabled={isInstantiatingContract}
+                    className="h-8"
+                  >
+                    <Plus className="mr-1 h-3 w-3" />
+                    Add Balance
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {instantiateContractForm.initialBalances.map(
+                    (balance, index) => (
+                      <div
+                        key={index}
+                        className="flex gap-2 items-start p-3 rounded-md border border-white/20 bg-input"
+                      >
+                        <div className="flex-1 grid grid-cols-2 gap-2">
+                          <div className="space-y-1">
+                            <label className="text-xs text-muted-foreground">
+                              Address
+                            </label>
+                            <Input
+                              type="text"
+                              placeholder="xion1..."
+                              value={balance.address}
+                              onChange={(e) =>
+                                updateInitialBalance(
+                                  index,
+                                  'address',
+                                  e.target.value
+                                )
+                              }
+                              disabled={isInstantiatingContract}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs text-muted-foreground">
+                              Amount
+                            </label>
+                            <Input
+                              type="text"
+                              placeholder="1000000"
+                              value={balance.amount}
+                              onChange={(e) =>
+                                updateInitialBalance(
+                                  index,
+                                  'amount',
+                                  e.target.value
+                                )
+                              }
+                              disabled={isInstantiatingContract}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                        </div>
+                        {instantiateContractForm.initialBalances.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeInitialBalance(index)}
+                            disabled={isInstantiatingContract}
+                            className="h-8 w-8 p-0 mt-6"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        )}
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+              <Button
+                onClick={handleInstantiateContract}
+                disabled={isInstantiatingContract}
+                variant="outline"
+                fullWidth
+              >
+                <FileCode className="mr-2 h-4 w-4" />
+                {isInstantiatingContract
+                  ? 'Instantiating...'
+                  : 'Instantiate Contract'}
               </Button>
             </div>
           </div>

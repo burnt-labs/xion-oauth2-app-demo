@@ -51,7 +51,7 @@ backend+confidential_client/
 ### Prerequisites
 
 - Node.js 18+ and pnpm
-- A running Xion OAuth2 server (default: `http://localhost:8787`)
+- A running Xion OAuth2 server (default: `https://oauth2.testnet.burnt.com/`)
 - OAuth2 Client credentials (Client ID and Client Secret)
 
 ### Installation
@@ -72,7 +72,7 @@ cp .env.example .env
 
 ```env
 # OAuth2 Server Configuration
-NEXT_PUBLIC_XION_OAUTH2_SERVER_URL=http://localhost:8787
+NEXT_PUBLIC_XION_OAUTH2_SERVER_URL=https://oauth2.testnet.burnt.com/
 
 # OAuth2 Client Configuration (Confidential Client)
 XION_OAUTH2_CLIENT_ID=your_client_id_here

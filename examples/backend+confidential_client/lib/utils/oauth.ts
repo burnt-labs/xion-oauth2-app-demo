@@ -5,7 +5,8 @@ const STORAGE_KEY_EXPIRATION = 'xion_oauth_expiration'
 
 export function getOAuthServerUrl(): string {
   return (
-    process.env.NEXT_PUBLIC_XION_OAUTH2_SERVER_URL || 'http://localhost:8787'
+    process.env.NEXT_PUBLIC_XION_OAUTH2_SERVER_URL ||
+    'https://oauth2.testnet.burnt.com/'
   )
 }
 
