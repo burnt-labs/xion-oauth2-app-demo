@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
-import { getTokenInfo, clearTokenInfo } from '@/utils/oauth'
+import { getTokenInfo, clearTokenInfo, refreshToken } from '@/utils/oauth'
 import { transactionApi, accountApi } from '@/utils/api'
 import {
   LogOut,
@@ -12,6 +12,7 @@ import {
   FileCode,
   Plus,
   Trash2,
+  RefreshCw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MeResponse } from '@/types'
@@ -93,6 +94,7 @@ export function Dashboard() {
       amount: string
     }[],
   })
+  const [isRefreshingToken, setIsRefreshingToken] = useState(false)
 
   useEffect(() => {
     const info = getTokenInfo()
@@ -100,10 +102,14 @@ export function Dashboard() {
     if (!info) {
       addLog('error', 'No valid token found. Please login again.')
     } else {
-      addLog('response', 'Token loaded successfully', {
+      const logData: Record<string, unknown> = {
         expiresIn: formatExpiresIn(info.expiresIn),
         expiration: new Date(info.expiration).toLocaleString(),
-      })
+      }
+      if (info.refreshToken) {
+        logData.hasRefreshToken = true
+      }
+      addLog('response', 'Token loaded successfully', logData)
     }
   }, [])
 
@@ -284,6 +290,38 @@ export function Dashboard() {
       ...instantiateContractForm,
       initialBalances: newBalances,
     })
+  }
+
+  const handleRefreshToken = async () => {
+    try {
+      setIsRefreshingToken(true)
+      addLog('request', 'Refreshing access token...')
+
+      const newTokenInfo = await refreshToken()
+      setTokenInfo(newTokenInfo)
+
+      const logData: Record<string, unknown> = {
+        expiresIn: formatExpiresIn(newTokenInfo.expiresIn),
+        expiration: new Date(newTokenInfo.expiration).toLocaleString(),
+      }
+      if (newTokenInfo.refreshToken) {
+        logData.hasRefreshToken = true
+      }
+
+      addLog('response', 'Token refreshed successfully', logData)
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
+      addLog('error', `Token refresh failed: ${errorMessage}`, error)
+      // If refresh fails, token info might be cleared, update state
+      const updatedTokenInfo = getTokenInfo()
+      setTokenInfo(updatedTokenInfo)
+      if (!updatedTokenInfo) {
+        addLog('error', 'Please login again to continue.')
+      }
+    } finally {
+      setIsRefreshingToken(false)
+    }
   }
 
   const handleLogout = () => {
@@ -724,6 +762,50 @@ export function Dashboard() {
                       {new Date(tokenInfo.expiration).toLocaleString()}
                     </span>
                   </div>
+                </div>
+
+                {/* Refresh Token Section */}
+                {tokenInfo.refreshToken && (
+                  <>
+                    <div className="border-t border-white/20 pt-4 mt-4">
+                      <h3 className="text-lg font-semibold text-card-foreground mb-4">
+                        Refresh Token
+                      </h3>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Refresh Token
+                      </label>
+                      <div className="rounded-md border border-white/20 bg-input p-3">
+                        <span className="font-mono text-xs break-all text-foreground">
+                          {tokenInfo.refreshToken.substring(0, 20)}...
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="pt-2">
+                  <Button
+                    onClick={handleRefreshToken}
+                    disabled={isRefreshingToken || !tokenInfo.refreshToken}
+                    variant="outline"
+                    fullWidth
+                  >
+                    <RefreshCw
+                      className={cn(
+                        'mr-2 h-4 w-4',
+                        isRefreshingToken && 'animate-spin'
+                      )}
+                    />
+                    {isRefreshingToken ? 'Refreshing...' : 'Refresh Token'}
+                  </Button>
+                  {!tokenInfo.refreshToken && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      No refresh token available. Please login again to get a
+                      new token.
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (

@@ -3,6 +3,7 @@ export interface TokenInfo {
   expiresIn: number
   expiration: number
   tokenType?: string
+  refreshToken?: string
 }
 
 export interface OAuthServerInfo {

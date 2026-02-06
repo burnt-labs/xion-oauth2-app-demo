@@ -2,6 +2,7 @@ import type { TokenInfo, OAuthServerInfo } from '@/types'
 
 const STORAGE_KEY_TOKEN = 'xion_oauth_token'
 const STORAGE_KEY_EXPIRATION = 'xion_oauth_expiration'
+const STORAGE_KEY_REFRESH_TOKEN = 'xion_oauth_refresh_token'
 const STORAGE_KEY_CODE_VERIFIER = 'xion_oauth_code_verifier'
 const STORAGE_KEY_STATE = 'xion_oauth_state'
 
@@ -142,6 +143,7 @@ export async function exchangeCodeForToken(
     expiresIn,
     expiration,
     tokenType: tokens.token_type,
+    refreshToken: tokens.refresh_token,
   }
 
   saveTokenInfo(tokenInfo)
@@ -156,11 +158,15 @@ export async function exchangeCodeForToken(
 export function saveTokenInfo(tokenInfo: TokenInfo): void {
   localStorage.setItem(STORAGE_KEY_TOKEN, tokenInfo.accessToken)
   localStorage.setItem(STORAGE_KEY_EXPIRATION, tokenInfo.expiration.toString())
+  if (tokenInfo.refreshToken) {
+    localStorage.setItem(STORAGE_KEY_REFRESH_TOKEN, tokenInfo.refreshToken)
+  }
 }
 
 export function getTokenInfo(): TokenInfo | null {
   const accessToken = localStorage.getItem(STORAGE_KEY_TOKEN)
   const expiration = localStorage.getItem(STORAGE_KEY_EXPIRATION)
+  const refreshToken = localStorage.getItem(STORAGE_KEY_REFRESH_TOKEN)
 
   if (!accessToken || !expiration) {
     return null
@@ -179,14 +185,67 @@ export function getTokenInfo(): TokenInfo | null {
     accessToken,
     expiration: expirationTime,
     expiresIn: expiresIn > 0 ? expiresIn : 0,
+    refreshToken: refreshToken || undefined,
   }
 }
 
 export function clearTokenInfo(): void {
   localStorage.removeItem(STORAGE_KEY_TOKEN)
   localStorage.removeItem(STORAGE_KEY_EXPIRATION)
+  localStorage.removeItem(STORAGE_KEY_REFRESH_TOKEN)
 }
 
 export function isAuthenticated(): boolean {
   return getTokenInfo() !== null
+}
+
+export async function refreshToken(): Promise<TokenInfo> {
+  const serverInfo = await getOAuthServerInfo()
+  const clientId = getClientId()
+  const currentTokenInfo = getTokenInfo()
+
+  if (!currentTokenInfo?.refreshToken) {
+    throw new Error('No refresh token available. Please login again.')
+  }
+
+  // Refresh access token using refresh_token grant type
+  const response = await fetch(serverInfo.token_endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: currentTokenInfo.refreshToken,
+      client_id: clientId,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response
+      .json()
+      .catch(() => ({ error: 'Token refresh failed' }))
+    // If refresh fails, clear token info
+    clearTokenInfo()
+    throw new Error(error.error || 'Token refresh failed')
+  }
+
+  const tokens = await response.json()
+  const expiresIn = tokens.expires_in || 3600
+  const expiration = Date.now() + expiresIn * 1000
+
+  // Use new refresh_token if provided, otherwise keep the old one
+  const newRefreshToken = tokens.refresh_token || currentTokenInfo.refreshToken
+
+  const tokenInfo: TokenInfo = {
+    accessToken: tokens.access_token,
+    expiresIn,
+    expiration,
+    tokenType: tokens.token_type,
+    refreshToken: newRefreshToken,
+  }
+
+  saveTokenInfo(tokenInfo)
+
+  return tokenInfo
 }
