@@ -50,7 +50,7 @@ backend+confidential_client/
 
 ### Prerequisites
 
-- Node.js 18+ and pnpm
+- Node.js 24+ and pnpm
 - A running Xion OAuth2 server (default: `https://oauth2.testnet.burnt.com/`)
 - OAuth2 Client credentials (Client ID and Client Secret)
 
