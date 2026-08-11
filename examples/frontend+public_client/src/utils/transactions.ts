@@ -47,6 +47,6 @@ export function createInstantiateCW20ContractMessage(
   })
   return {
     typeUrl: '/cosmwasm.wasm.v1.MsgInstantiateContract',
-    value: msg,
+    value: MsgInstantiateContract.encode(msg).finish(),
   }
 }
