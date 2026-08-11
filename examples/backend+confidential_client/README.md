@@ -120,13 +120,13 @@ When making API requests:
 
 ## Key Differences from Public Client Example
 
-| Feature | Public Client | Confidential Client |
-|---------|--------------|-------------------|
-| Token Exchange | Client-side (browser) | Server-side (API route) |
-| Client Secret | Not used | Required and stored on server |
-| Token Storage | localStorage | httpOnly cookies |
-| PKCE | Required | Optional (not used in this example) |
-| Security | Code verifier in browser | Client secret never exposed |
+| Feature        | Public Client            | Confidential Client                 |
+| -------------- | ------------------------ | ----------------------------------- |
+| Token Exchange | Client-side (browser)    | Server-side (API route)             |
+| Client Secret  | Not used                 | Required and stored on server       |
+| Token Storage  | localStorage             | httpOnly cookies                    |
+| PKCE           | Required                 | Optional (not used in this example) |
+| Security       | Code verifier in browser | Client secret never exposed         |
 
 ## API Routes
 

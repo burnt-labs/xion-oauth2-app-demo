@@ -65,7 +65,9 @@ export function Dashboard() {
   const [activeApiTestSubMenu, setActiveApiTestSubMenu] =
     useState<ApiTestSubMenu>('account-query')
   // Only initialize tokenInfo on client to avoid hydration mismatch
-  const [tokenInfo, setTokenInfo] = useState<ReturnType<typeof getTokenInfo> | null>(null)
+  const [tokenInfo, setTokenInfo] = useState<ReturnType<
+    typeof getTokenInfo
+  > | null>(null)
   const [consoleLogs, setConsoleLogs] = useState<ConsoleLog[]>([])
   const [isSendingTokens, setIsSendingTokens] = useState(false)
   const [isLoadingAccount, setIsLoadingAccount] = useState(false)

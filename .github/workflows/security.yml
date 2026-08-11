@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.4
@@ -21,5 +23,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level low
+      - run: pnpm format:check
       - run: pnpm check-types
+      - run: pnpm --filter @xion-oauth2-app-demo/frontend-public-client test:transactions
       - run: pnpm build
+      - name: Validate GitHub Actions workflows
+        uses: docker://rhysd/actionlint:1.7.7
