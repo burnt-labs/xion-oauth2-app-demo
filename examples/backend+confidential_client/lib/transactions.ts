@@ -1,5 +1,5 @@
 import { EncodeObject } from '@cosmjs/proto-signing'
-import { MsgSend } from '@burnt-labs/xion-types/types/cosmos/bank/v1beta1/tx'
+import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx'
 
 export function createSendTokensMessage(
   toAddress: string,
@@ -7,7 +7,7 @@ export function createSendTokensMessage(
   denom: string
 ): EncodeObject {
   return {
-    typeUrl: MsgSend.typeUrl,
+    typeUrl: '/cosmos.bank.v1beta1.MsgSend',
     value: MsgSend.fromPartial({
       toAddress: toAddress,
       amount: [

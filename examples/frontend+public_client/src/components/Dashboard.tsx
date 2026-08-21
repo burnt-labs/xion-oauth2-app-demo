@@ -191,7 +191,10 @@ export function Dashboard() {
 
   const handleInstantiateContract = async () => {
     if (!accountData?.id) {
-      addLog('error', 'Please query account information first to get Meta Account Address')
+      addLog(
+        'error',
+        'Please query account information first to get Meta Account Address'
+      )
       return
     }
 
@@ -556,7 +559,8 @@ export function Dashboard() {
                 </label>
                 <div className="rounded-md border border-white/20 bg-input p-3">
                   <span className="font-mono text-sm text-foreground break-all">
-                    {accountData?.id || 'Please query account information first'}
+                    {accountData?.id ||
+                      'Please query account information first'}
                   </span>
                 </div>
               </div>
@@ -845,7 +849,9 @@ export function Dashboard() {
               </div>
 
               {/* Right Form Area */}
-              <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar pr-2">{renderApiTestForm()}</div>
+              <div className="flex-1 min-w-0 overflow-y-auto custom-scrollbar pr-2">
+                {renderApiTestForm()}
+              </div>
             </div>
 
             {/* Bottom Section: Console */}

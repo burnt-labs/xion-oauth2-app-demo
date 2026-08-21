@@ -46,9 +46,7 @@ export default function Callback() {
         router.push('/dashboard')
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : 'Failed to process callback'
+          err instanceof Error ? err.message : 'Failed to process callback'
         )
         setIsLoading(false)
       }
